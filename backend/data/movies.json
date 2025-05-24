@@ -1,18 +1,36 @@
 [
-    {
-      "id": "movie1_unique_id",
-      "title": "Inception",
-      "description": "A thief who steals information by entering people's dreams.",
-      "releaseDate": "2010-07-16T00:00:00.000Z",
-      "genre": "Sci-Fi",
-      "director": "Christopher Nolan"
-    },
-    {
-      "id": "movie2_another_id",
-      "title": "The Matrix",
-      "description": "A computer hacker learns from mysterious rebels about the true nature of his reality.",
-      "releaseDate": "1999-03-31T00:00:00.000Z",
-      "genre": "Action",
-      "director": "Lana Wachowski, Lilly Wachowski"
-    }
-  ]
+  {
+    "id": "movie1_unique_id",
+    "title": "Inception",
+    "description": "A thief who steals information by entering people's dreams.",
+    "releaseDate": "2010-07-16T00:00:00.000Z",
+    "genre": "Sci-Fi",
+    "director": "Christopher Nolan"
+  },
+  {
+    "id": "movie2_another_id",
+    "title": "The Matrix",
+    "description": "A computer hacker learns from mysterious rebels about the true nature of his reality.",
+    "releaseDate": "1999-03-31T00:00:00.000Z",
+    "genre": "Action",
+    "director": "Lana Wachowski, Lilly Wachowski"
+  },
+  {
+    "id": "mb2dp8sj.w5q",
+    "title": "The Dark Knight",
+    "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+    "releaseDate": "2008-07-18T00:00:00.000Z",
+    "genre": "Action",
+    "director": "Christopher Nolan"
+  },
+  {
+    "id": "mb2g4qsw.gqr",
+    "title": "ghdjkfgxvbxcv123",
+    "description": "edfgyhfgsh",
+    "releaseDate": "2025-04-28T00:00:00.000Z",
+    "genre": "cvbnmbv",
+    "director": "xcvccc",
+    "imageUrl": "",
+    "trailerUrl": ""
+  }
+]

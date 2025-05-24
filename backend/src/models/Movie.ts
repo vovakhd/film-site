@@ -5,4 +5,6 @@ export interface Movie {
   releaseDate: Date;
   genre: string;
   director: string;
+  imageUrl?: string;
+  trailerUrl?: string;
 } 

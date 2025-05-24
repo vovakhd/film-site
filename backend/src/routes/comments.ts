@@ -92,17 +92,22 @@ router.post('/', authMiddleware, async (req: AuthenticatedRequest, res: Response
   }
 });
 
-// Delete a comment (protected, only by author for now)
+// Delete a comment (protected, only by author or admin)
 router.delete('/:commentId', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     let comments = await getCommentsFromFile();
     const commentId = req.params.commentId;
     
-    // Type guard for req.user
-    if (typeof req.user !== 'object' || req.user === null || !('id' in req.user)) {
-      return res.status(401).json({ message: 'User ID not found in token or token invalid' });
+    // Type guard for req.user and its properties
+    if (typeof req.user !== 'object' || 
+        req.user === null || 
+        !('id' in req.user) || 
+        !('role' in req.user) // Ensure role is present
+    ) {
+      return res.status(401).json({ message: 'User ID or role not found in token or token invalid' });
     }
-    const userId = req.user.id as string; // Now safe to access id
+    const userId = req.user.id as string;
+    const userRole = req.user.role as string; // Get user role
 
     const commentIndex = comments.findIndex(c => c.id === commentId);
 
@@ -110,9 +115,8 @@ router.delete('/:commentId', authMiddleware, async (req: AuthenticatedRequest, r
       return res.status(404).json({ message: 'Comment not found' });
     }
 
-    // Check if the logged-in user is the author of the comment
-    if (comments[commentIndex].userId !== userId) {
-      // Later, add: && !req.user.isAdmin (once isAdmin role is implemented)
+    // Check if the logged-in user is the author or an admin
+    if (comments[commentIndex].userId !== userId && userRole !== 'admin') {
       return res.status(403).json({ message: 'User not authorized to delete this comment' });
     }
 

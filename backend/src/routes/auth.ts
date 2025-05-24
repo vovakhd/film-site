@@ -74,6 +74,7 @@ router.post('/register', async (req: Request, res: Response) => {
       username,
       email,
       password: hashedPassword,
+      role: 'user' // Set default role to 'user'
     };
     users.push(newUser);
     await saveUsersToFile(users);
@@ -106,7 +107,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, username: user.username /* Add username to token payload */ }, 
+      { id: user.id, username: user.username, role: user.role /* Add role to token payload */ }, 
       'your-secret-key', // TODO: Replace with environment variable
       { expiresIn: '1h' }
     );

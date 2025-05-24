@@ -33,6 +33,7 @@ const MovieDetailPage: React.FC = () => {
   const [commentError, setCommentError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -41,13 +42,13 @@ const MovieDetailPage: React.FC = () => {
       try {
         const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
         setCurrentUserId(payload.id);
-        // We can also set currentUsername here if needed elsewhere on the page
-        // const currentUsername = payload.username;
+        setCurrentUserRole(payload.role);
       } catch (e) {
         console.error('Error decoding token:', e);
-        // Handle error or clear token if invalid
         localStorage.removeItem('token');
         setIsAuthenticated(false);
+        setCurrentUserId(null);
+        setCurrentUserRole(null);
       }
     }
   }, []); // Runs once on mount
@@ -203,9 +204,11 @@ const MovieDetailPage: React.FC = () => {
           {comments.map(comment => (
             <li key={comment.id}>
               <p><strong>{comment.username || 'User'}:</strong> {comment.text}</p>
-              <small>Posted on: {new Date(comment.createdAt).toLocaleString()}</small>
-              {isAuthenticated && currentUserId === comment.userId && (
-                <button onClick={() => handleCommentDelete(comment.id)}>Delete</button>
+              <small> - By {comment.username || 'Anonymous'} on {new Date(comment.createdAt).toLocaleString()}</small>
+              {(currentUserId === comment.userId || currentUserRole === 'admin') && (
+                <button onClick={() => handleCommentDelete(comment.id)} style={{ marginLeft: '10px' }}>
+                  Delete
+                </button>
               )}
             </li>
           ))}

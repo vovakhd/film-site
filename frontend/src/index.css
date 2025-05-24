@@ -11,3 +11,39 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+body.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.dark-mode a {
+  color: #bb86fc;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode button {
+  background-color: #333333;
+  color: #ffffff;
+  border: 1px solid #555555;
+}
+
+body.dark-mode button:hover {
+  background-color: #444444;
+}
+
+body.dark-mode .navbar {
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #333333;
+}
+
+body.dark-mode .navbar a {
+  color: #ffffff;
+}
+
+body.dark-mode .navbar a:hover {
+  color: #bb86fc;
+}
+
+/* Add other specific dark mode styles for components as needed */
