@@ -10,6 +10,8 @@ interface Movie {
   releaseDate: string;
   genre: string;
   director: string;
+  imageUrl?: string;
+  trailerUrl?: string;
 }
 
 interface Comment {
@@ -34,6 +36,8 @@ const MovieDetailPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [currentCommentPage, setCurrentCommentPage] = useState(1); // State for current comment page
+  const commentsPerPage = 5; // Number of comments per page
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -134,6 +138,7 @@ const MovieDetailPage: React.FC = () => {
       // Update comments state by adding the new comment to the beginning (or sort again)
       setComments(prevComments => [newComment, ...prevComments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       setNewCommentText('');
+      setCurrentCommentPage(1); // Go to first page of comments to see the new one
     } catch (error) {
       setCommentError(error instanceof Error ? error.message : 'Failed to post comment');
     }
@@ -160,7 +165,15 @@ const MovieDetailPage: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete comment');
       }
-      setComments(prevComments => prevComments.filter(c => c.id !== commentId));
+      const updatedComments = comments.filter(c => c.id !== commentId);
+      setComments(updatedComments);
+      // Adjust current page if the last item on the page was deleted
+      const totalCommentPagesAfterDelete = Math.ceil(updatedComments.length / commentsPerPage);
+      if (currentCommentPage > totalCommentPagesAfterDelete && totalCommentPagesAfterDelete > 0) {
+        setCurrentCommentPage(totalCommentPagesAfterDelete);
+      } else if (totalCommentPagesAfterDelete === 0) {
+        setCurrentCommentPage(1); // Reset to 1 if no comments left
+      }
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to delete comment');
     }
@@ -170,13 +183,78 @@ const MovieDetailPage: React.FC = () => {
   if (error) return <p>Error: {error}</p>;
   if (!movie) return <p>Movie not found.</p>;
 
+  // Function to convert YouTube URL to embeddable URL
+  const getYouTubeEmbedUrl = (url: string): string | null => {
+    let videoId: string | null = null;
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'youtube.com') {
+        if (urlObj.pathname === '/watch') {
+          videoId = urlObj.searchParams.get('v');
+        } else if (urlObj.pathname.startsWith('/embed/')) {
+          videoId = urlObj.pathname.split('/embed/')[1].split('?')[0];
+        }
+      } else if (urlObj.hostname === 'youtu.be') {
+        videoId = urlObj.pathname.substring(1).split('?')[0];
+      }
+    } catch (e) {
+      console.error('Invalid URL for YouTube video:', e);
+      return null;
+    }
+
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return null; // Return null if not a valid YouTube URL or ID not found
+  };
+
+  const embedUrl = movie.trailerUrl ? getYouTubeEmbedUrl(movie.trailerUrl) : null;
+
+  // Comments Pagination logic
+  const indexOfLastComment = currentCommentPage * commentsPerPage;
+  const indexOfFirstComment = indexOfLastComment - commentsPerPage;
+  const currentComments = comments.slice(indexOfFirstComment, indexOfLastComment);
+  const totalCommentPages = Math.ceil(comments.length / commentsPerPage);
+
+  const paginateComments = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalCommentPages) {
+      setCurrentCommentPage(pageNumber);
+    }
+  };
+
   return (
     <div>
       <h2>{movie.title}</h2>
+      {movie.imageUrl && (
+        <img 
+          src={movie.imageUrl} 
+          alt={movie.title} 
+          style={{ maxWidth: '400px', height: 'auto', marginBottom: '20px' }} 
+        />
+      )}
       <p><strong>Director:</strong> {movie.director || 'N/A'}</p>
       <p><strong>Genre:</strong> {movie.genre || 'N/A'}</p>
       <p><strong>Release Date:</strong> {new Date(movie.releaseDate).toLocaleDateString()}</p>
       <p><strong>Description:</strong> {movie.description}</p>
+      
+      {embedUrl ? (
+        <div className="video-responsive" style={{ marginTop: '20px', marginBottom: '20px' }}>
+          <h4>Trailer:</h4>
+          <iframe
+            width="560"
+            height="315"
+            src={embedUrl}
+            title={`${movie.title} Trailer`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      ) : movie.trailerUrl ? (
+        <p style={{ marginTop: '20px' }}>
+          <strong>Trailer:</strong> <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer">Watch Trailer</a> (Could not embed)
+        </p>
+      ) : null}
 
       <hr />
       <h3>Comments</h3>
@@ -200,19 +278,33 @@ const MovieDetailPage: React.FC = () => {
       {loadingComments ? (
         <p>Loading comments...</p>
       ) : comments.length > 0 ? (
-        <ul>
-          {comments.map(comment => (
-            <li key={comment.id}>
-              <p><strong>{comment.username || 'User'}:</strong> {comment.text}</p>
-              <small> - By {comment.username || 'Anonymous'} on {new Date(comment.createdAt).toLocaleString()}</small>
-              {(currentUserId === comment.userId || currentUserRole === 'admin') && (
-                <button onClick={() => handleCommentDelete(comment.id)} style={{ marginLeft: '10px' }}>
-                  Delete
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul>
+            {currentComments.map(comment => (
+              <li key={comment.id}>
+                <p><strong>{comment.username || 'User'}:</strong> {comment.text}</p>
+                <small> - By {comment.username || 'Anonymous'} on {new Date(comment.createdAt).toLocaleString()}</small>
+                {(currentUserId === comment.userId || currentUserRole === 'admin') && (
+                  <button onClick={() => handleCommentDelete(comment.id)} style={{ marginLeft: '10px' }}>
+                    Delete
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {/* Comments Pagination Controls */}
+          {totalCommentPages > 1 && (
+            <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+              <button onClick={() => paginateComments(currentCommentPage - 1)} disabled={currentCommentPage === 1}>
+                Previous Comments
+              </button>
+              <span>Page {currentCommentPage} of {totalCommentPages}</span>
+              <button onClick={() => paginateComments(currentCommentPage + 1)} disabled={currentCommentPage === totalCommentPages}>
+                Next Comments
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <p>No comments yet. Be the first to comment!</p>
       )}
