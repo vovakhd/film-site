@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // To redirect after login
+import { useNavigate, Link } from 'react-router-dom'; // To redirect after login, Link for navigation
+import './LoginPage.css'; // Import the CSS file
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -59,32 +60,49 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      {message && <p>{message}</p>}
+    <div className="login-page" role="main">
+      <div className="login-container">
+        <h1>Login to Your Account</h1>
+        {message && 
+          <p 
+            className={`message ${message.includes('successful') ? 'success-message' : 'error-message-login'}`}
+            role="alert"
+            aria-live="assertive"
+          >
+            {message}
+          </p>
+        }
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              aria-required="true"
+            />
+          </div>
+          <button type="submit">Login</button>
+        </form>
+        <p className="switch-form-link">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
+      </div>
     </div>
   );
 };

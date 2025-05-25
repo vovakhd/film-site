@@ -1,6 +1,7 @@
 import React, { useEffect, useState, FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom'; // Link seems unused here, consider removing if not needed later
+import './MovieDetailPage.css'; // Import the CSS file
 
 // Align with backend models
 interface Movie {
@@ -179,9 +180,9 @@ const MovieDetailPage: React.FC = () => {
     }
   };
 
-  if (loadingMovie) return <p>Loading movie details...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!movie) return <p>Movie not found.</p>;
+  if (loadingMovie) return <p className="loading-message" aria-live="polite">Loading movie details...</p>;
+  if (error) return <p className="error-message" role="alert" aria-live="assertive">Error: {error}</p>;
+  if (!movie) return <p className="info-message" aria-live="polite">Movie not found.</p>;
 
   // Function to convert YouTube URL to embeddable URL
   const getYouTubeEmbedUrl = (url: string): string | null => {
@@ -223,90 +224,121 @@ const MovieDetailPage: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>{movie.title}</h2>
-      {movie.imageUrl && (
-        <img 
-          src={movie.imageUrl} 
-          alt={movie.title} 
-          style={{ maxWidth: '400px', height: 'auto', marginBottom: '20px' }} 
-        />
-      )}
-      <p><strong>Director:</strong> {movie.director || 'N/A'}</p>
-      <p><strong>Genre:</strong> {movie.genre || 'N/A'}</p>
-      <p><strong>Release Date:</strong> {new Date(movie.releaseDate).toLocaleDateString()}</p>
-      <p><strong>Description:</strong> {movie.description}</p>
-      
-      {embedUrl ? (
-        <div className="video-responsive" style={{ marginTop: '20px', marginBottom: '20px' }}>
-          <h4>Trailer:</h4>
-          <iframe
-            width="560"
-            height="315"
-            src={embedUrl}
-            title={`${movie.title} Trailer`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      ) : movie.trailerUrl ? (
-        <p style={{ marginTop: '20px' }}>
-          <strong>Trailer:</strong> <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer">Watch Trailer</a> (Could not embed)
-        </p>
-      ) : null}
+    <div className="movie-detail-page" role="main">
+      {loadingMovie && <p className="loading-message text-center" aria-live="polite">Loading movie details...</p>}
+      {error && <p className="error-message text-center" role="alert" aria-live="assertive">Error: {error}</p>}
+      {!loadingMovie && !movie && <p className="error-message text-center" aria-live="polite">Movie not found.</p>}
 
-      <hr />
-      <h3>Comments</h3>
-      {isAuthenticated && (
-        <form onSubmit={handleCommentSubmit}>
-          <div>
-            <textarea
-              rows={3}
-              value={newCommentText}
-              onChange={(e) => setNewCommentText(e.target.value)}
-              placeholder="Write a comment..."
-              required
-            ></textarea>
-          </div>
-          <button type="submit">Post Comment</button>
-          {commentError && <p style={{ color: 'red' }}>{commentError}</p>}
-        </form>
-      )}
-      {!isAuthenticated && <p><Link to="/login">Log in</Link> to post a comment.</p>}
-
-      {loadingComments ? (
-        <p>Loading comments...</p>
-      ) : comments.length > 0 ? (
+      {movie && (
         <>
-          <ul>
-            {currentComments.map(comment => (
-              <li key={comment.id}>
-                <p><strong>{comment.username || 'User'}:</strong> {comment.text}</p>
-                <small> - By {comment.username || 'Anonymous'} on {new Date(comment.createdAt).toLocaleString()}</small>
-                {(currentUserId === comment.userId || currentUserRole === 'admin') && (
-                  <button onClick={() => handleCommentDelete(comment.id)} style={{ marginLeft: '10px' }}>
-                    Delete
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-          {/* Comments Pagination Controls */}
-          {totalCommentPages > 1 && (
-            <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-              <button onClick={() => paginateComments(currentCommentPage - 1)} disabled={currentCommentPage === 1}>
-                Previous Comments
-              </button>
-              <span>Page {currentCommentPage} of {totalCommentPages}</span>
-              <button onClick={() => paginateComments(currentCommentPage + 1)} disabled={currentCommentPage === totalCommentPages}>
-                Next Comments
-              </button>
+          <div className="movie-detail-layout">
+            {movie.imageUrl && (
+              <div className="movie-detail-image-container">
+                <img
+                  src={movie.imageUrl}
+                  alt={movie.title}
+                  className="movie-detail-image"
+                />
+              </div>
+            )}
+            <div className="movie-detail-info">
+              <h1>{movie.title}</h1>
+              <div className="meta-info">
+                <p><strong>Director:</strong> {movie.director || 'N/A'}</p>
+                <p><strong>Genre:</strong> {movie.genre || 'N/A'}</p>
+                <p><strong>Release Date:</strong> {new Date(movie.releaseDate).toLocaleDateString()}</p>
+              </div>
+              <p className="description">{movie.description}</p>
             </div>
+          </div>
+
+          {embedUrl ? (
+            <div className="trailer-section">
+              <h2>Trailer</h2>
+              <div className="trailer-container">
+                <iframe 
+                  src={embedUrl} 
+                  title={`Trailer for ${movie.title}`}
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                  className="movie-trailer-iframe"
+                ></iframe>
+              </div>
+            </div>
+          ) : movie.trailerUrl && (
+            <p className="trailer-info">Could not embed trailer. <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer">Watch on YouTube</a></p>
           )}
+
+          <div className="comments-section" aria-label="Comments section">
+            <h3>Comments ({comments.length})</h3>
+            {isAuthenticated ? (
+              <form onSubmit={handleCommentSubmit} className="comment-form">
+                <textarea 
+                  value={newCommentText} 
+                  onChange={(e) => setNewCommentText(e.target.value)} 
+                  placeholder="Add your comment..." 
+                  rows={4}
+                  aria-label="Add your comment"
+                  aria-required="true"
+                />
+                <button type="submit" disabled={!newCommentText.trim()}>Post Comment</button>
+                {commentError && <p className="comment-error-message" role="alert" aria-live="assertive">{commentError}</p>}
+              </form>
+            ) : (
+              <p className="login-prompt">Please <a href="/login">login</a> to post comments.</p>
+            )}
+            {loadingComments ? (
+              <p className="loading-message" aria-live="polite">Loading comments...</p>
+            ) : (
+              <>
+                {!loadingComments && comments.length === 0 && (
+                  <p>No comments yet. Be the first to comment!</p>
+                )}
+                
+                {!loadingComments && comments.length > 0 && (
+                  <ul className="comment-list">
+                    {currentComments.map(comment => (
+                      <li key={comment.id} className="comment-item">
+                        <strong>{comment.username || 'User'}</strong>
+                        <p>{comment.text}</p>
+                        <p className="comment-date">{new Date(comment.createdAt).toLocaleString()}</p>
+                        {(currentUserRole === 'admin' || currentUserId === comment.userId) && (
+                           <button onClick={() => handleCommentDelete(comment.id)} className="delete-comment-button">
+                             Delete
+                           </button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Comments Pagination Controls */}
+                {comments.length > commentsPerPage && (
+                  <div className="pagination-controls comments-pagination">
+                    <button 
+                      onClick={() => paginateComments(currentCommentPage - 1)} 
+                      disabled={currentCommentPage === 1}
+                      aria-label="Go to previous page of comments"
+                    >
+                      Previous
+                    </button>
+                    <span aria-label={`Comments page ${currentCommentPage} of ${totalCommentPages}`} aria-live="polite">
+                      Page {currentCommentPage} of {totalCommentPages}
+                    </span>
+                    <button 
+                      onClick={() => paginateComments(currentCommentPage + 1)} 
+                      disabled={currentCommentPage === totalCommentPages}
+                      aria-label="Go to next page of comments"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </>
-      ) : (
-        <p>No comments yet. Be the first to comment!</p>
       )}
     </div>
   );

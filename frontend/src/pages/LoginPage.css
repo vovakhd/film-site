@@ -1,0 +1,102 @@
+/* LoginPage.css */
+
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: calc(100vh - 80px - 40px); /* Full height minus navbar and some padding */
+}
+
+.login-container {
+  background-color: #fff; /* Light mode background */
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 420px; /* Max width for the form container */
+  text-align: center;
+}
+
+body.dark-mode .login-container {
+  background-color: #1e1e1e; /* Dark mode background */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.login-container h1 {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+body.dark-mode .login-container h1 {
+  color: #e0e0e0;
+}
+
+.login-form .form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #444;
+}
+
+body.dark-mode .login-form label {
+  color: #c0c0c0;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Ensure padding doesn't increase width */
+}
+
+body.dark-mode .login-form input[type="email"],
+body.dark-mode .login-form input[type="password"] {
+  background-color: #2c2c2c;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.login-form button[type="submit"] {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  /* Uses global button styles, can be overridden if needed */
+}
+
+.error-message-login {
+  color: #d9534f;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+body.dark-mode .error-message-login {
+  color: #f48fb1;
+  background-color: #4a272a; /* Darker red background for dark mode */
+  border-color: #8b444b;
+}
+
+.login-page .switch-form-link {
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.login-page .switch-form-link a {
+  /* Uses global link styles */
+  font-weight: bold;
+} 

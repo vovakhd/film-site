@@ -1,0 +1,254 @@
+/* AdminPage.css */
+
+/* General layout for admin pages */
+.admin-page-container {
+  padding: 2rem;
+  max-width: 1200px; /* Or your preferred max-width for admin sections */
+  margin: 0 auto;
+}
+
+.admin-page-container h1, 
+.admin-page-container h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+body.dark-mode .admin-page-container h1,
+body.dark-mode .admin-page-container h2 {
+  color: #e0e0e0;
+}
+
+/* Basic Table Styling (can be expanded) */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle shadow for tables */
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+body.dark-mode .admin-table th,
+body.dark-mode .admin-table td {
+  border-color: #444;
+}
+
+.admin-table th {
+  background-color: #f8f9fa; /* Light header for table */
+  font-weight: bold;
+}
+
+body.dark-mode .admin-table th {
+  background-color: #2c2c2c; /* Dark header for table */
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background-color: #fdfdfd; /* Zebra striping for light mode */
+}
+
+body.dark-mode .admin-table tbody tr:nth-child(even) {
+  background-color: #252525; /* Zebra striping for dark mode */
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+body.dark-mode .admin-table tbody tr:hover {
+  background-color: #333;
+}
+
+.admin-table img.thumbnail {
+  max-width: 80px;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* Action Buttons in Table */
+.admin-table .action-buttons a,
+.admin-table .action-buttons button {
+  margin-right: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block; /* Align buttons nicely */
+}
+
+.admin-table .action-buttons .edit-button {
+  background-color: #ffc107; /* Yellow for edit */
+  color: #212529;
+  border: 1px solid #ffc107;
+}
+.admin-table .action-buttons .edit-button:hover {
+  background-color: #e0a800;
+}
+
+.admin-table .action-buttons .delete-button {
+  background-color: #dc3545; /* Red for delete */
+  color: white;
+  border: 1px solid #dc3545;
+}
+.admin-table .action-buttons .delete-button:hover {
+  background-color: #c82333;
+}
+
+body.dark-mode .admin-table .action-buttons .edit-button {
+  background-color: #ffca2c;
+  border-color: #ffca2c;
+  color: #212529;
+}
+body.dark-mode .admin-table .action-buttons .edit-button:hover {
+  background-color: #ffc107;
+}
+
+body.dark-mode .admin-table .action-buttons .delete-button {
+  background-color: #ef5350;
+  border-color: #ef5350;
+  color: white;
+}
+body.dark-mode .admin-table .action-buttons .delete-button:hover {
+  background-color: #d32f2f;
+}
+
+
+/* Admin Form Styling (for New/Edit pages) */
+.admin-form {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 700px; /* Max width for forms */
+  margin: 1rem auto; /* Center forms */
+}
+
+body.dark-mode .admin-form {
+  background-color: #1e1e1e;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.admin-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.admin-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="date"],
+.admin-form input[type="url"],
+.admin-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  /* Uses global input styles but can be specialized here */
+}
+
+.admin-form textarea {
+  min-height: 120px;
+  resize: vertical; /* Allow vertical resize */
+}
+
+/* Styles for buttons within admin forms (e.g., Submit, Cancel) */
+.admin-form-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 1rem;
+}
+
+.admin-form-actions .submit-button {
+  /* Uses global button styles, or define specific admin submit button style */
+  padding: 0.7rem 1.5rem;
+}
+
+.admin-form-actions .cancel-button {
+  padding: 0.7rem 1.5rem;
+  background-color: #6c757d; /* Grey for cancel */
+  color: white;
+  border: 1px solid #6c757d;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.admin-form-actions .cancel-button:hover {
+  background-color: #5a6268;
+}
+
+body.dark-mode .admin-form-actions .cancel-button {
+  background-color: #545b62;
+  border-color: #545b62;
+}
+
+body.dark-mode .admin-form-actions .cancel-button:hover {
+  background-color: #494f54;
+}
+
+.admin-page-container .admin-button-link {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    margin: 1rem 0;
+    background-color: #007bff; /* Primary button color */
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.admin-page-container .admin-button-link:hover {
+    background-color: #0056b3;
+}
+
+body.dark-mode .admin-page-container .admin-button-link {
+    background-color: #bb86fc;
+    color: #121212;
+}
+
+body.dark-mode .admin-page-container .admin-button-link:hover {
+    background-color: #a06cd5;
+}
+
+.success-message-admin {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+body.dark-mode .success-message-admin {
+    color: #a6d7ae;
+    background-color: #2a4b37; 
+    border-color: #51775c;
+}
+
+.error-message-admin {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+body.dark-mode .error-message-admin {
+    color: #f48fb1;
+    background-color: #4a272a; 
+    border-color: #8b444b;
+} 

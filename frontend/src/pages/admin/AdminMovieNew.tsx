@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import './AdminPage.css'; // Import the shared admin CSS
 
 interface MovieFormData {
   title: string;
@@ -86,40 +87,44 @@ const AdminMovieNew: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Add New Movie (Admin)</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', maxWidth: '500px', gap: '10px' }}>
-        <div>
+    <div className="admin-page-container">
+      <h2>Add New Movie</h2>
+      <form onSubmit={handleSubmit} className="admin-form">
+        {error && <p className="error-message-admin">{error}</p>}
+        {successMessage && <p className="success-message-admin">{successMessage}</p>}
+        
+        <div className="form-group">
           <label htmlFor="title">Title: (*)</label>
-          <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required style={{ width: '100%' }} />
+          <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="description">Description: (*)</label>
-          <textarea id="description" name="description" value={formData.description} onChange={handleChange} required style={{ width: '100%', minHeight: '80px' }} />
+          <textarea id="description" name="description" value={formData.description} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="releaseDate">Release Date: (*)</label>
-          <input type="date" id="releaseDate" name="releaseDate" value={formData.releaseDate} onChange={handleChange} required style={{ width: '100%' }} />
+          <input type="date" id="releaseDate" name="releaseDate" value={formData.releaseDate} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="genre">Genre: (*)</label>
-          <input type="text" id="genre" name="genre" value={formData.genre} onChange={handleChange} required style={{ width: '100%' }} />
+          <input type="text" id="genre" name="genre" value={formData.genre} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="director">Director: (*)</label>
-          <input type="text" id="director" name="director" value={formData.director} onChange={handleChange} required style={{ width: '100%' }} />
+          <input type="text" id="director" name="director" value={formData.director} onChange={handleChange} required />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="imageUrl">Image URL:</label>
-          <input type="url" id="imageUrl" name="imageUrl" value={formData.imageUrl} onChange={handleChange} style={{ width: '100%' }} />
+          <input type="url" id="imageUrl" name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.jpg" />
         </div>
-        <div>
-          <label htmlFor="trailerUrl">Trailer URL (YouTube embed link preferrably):</label>
-          <input type="url" id="trailerUrl" name="trailerUrl" value={formData.trailerUrl} onChange={handleChange} style={{ width: '100%' }} />
+        <div className="form-group">
+          <label htmlFor="trailerUrl">Trailer URL (YouTube embed link):</label>
+          <input type="url" id="trailerUrl" name="trailerUrl" value={formData.trailerUrl} onChange={handleChange} placeholder="https://www.youtube.com/embed/VIDEO_ID" />
         </div>
-        <button type="submit" style={{ padding: '10px', marginTop: '10px' }}>Add Movie</button>
+        <div className="admin-form-actions">
+            <Link to="/admin/movies" className="cancel-button">Cancel</Link>
+            <button type="submit" className="submit-button">Add Movie</button>
+        </div>
       </form>
     </div>
   );

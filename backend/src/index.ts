@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth'; // Import auth routes
-import movieRoutes from './routes/movies'; // Import movie routes
+import movieRoutes from './routes/movies'; // Assuming movies.js is now in src/routes/
 import commentRoutes from './routes/comments'; // Import comment routes
 
 const app = express();

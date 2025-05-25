@@ -5,6 +5,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f4f4; /* Light mode background */
+  color: #333; /* Light mode text color */
+  line-height: 1.6; /* Improved readability */
 }
 
 code {
@@ -12,38 +15,92 @@ code {
     monospace;
 }
 
+/* Dark Mode Styles */
 body.dark-mode {
   background-color: #121212;
-  color: #ffffff;
+  color: #e0e0e0; /* Slightly lighter than pure white for better contrast */
 }
 
 body.dark-mode a {
-  color: #bb86fc;
+  color: #bb86fc; /* A common dark mode accent color */
 }
 
 body.dark-mode input,
 body.dark-mode textarea,
+body.dark-mode button,
+body.dark-mode select {
+  background-color: #1e1e1e; /* Darker background for form elements */
+  color: #e0e0e0;
+  border: 1px solid #333; /* Subtle border for form elements */
+  border-radius: 4px; /* Rounded corners for form elements */
+  padding: 10px; /* Consistent padding */
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #757575; /* Placeholder text color */
+}
+
 body.dark-mode button {
-  background-color: #333333;
-  color: #ffffff;
-  border: 1px solid #555555;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 body.dark-mode button:hover {
-  background-color: #444444;
+  background-color: #bb86fc;
+  color: #000000;
+  border-color: #bb86fc;
 }
 
-body.dark-mode .navbar {
-  background-color: #1e1e1e;
-  border-bottom: 1px solid #333333;
+/* Light Mode Styles for Form Elements and Buttons for consistency */
+input,
+textarea,
+button,
+select {
+  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  font-family: inherit; /* Use the body's font family */
 }
 
-body.dark-mode .navbar a {
-  color: #ffffff;
+input::placeholder,
+textarea::placeholder {
+  color: #999;
 }
 
-body.dark-mode .navbar a:hover {
-  color: #bb86fc;
+button {
+  cursor: pointer;
+  background-color: #007bff; /* Example primary button color */
+  color: white;
+  border-color: #007bff;
+  transition: background-color 0.2s ease-in-out;
 }
 
-/* Add other specific dark mode styles for components as needed */
+button:hover {
+  background-color: #0056b3;
+}
+
+/* General Link Styling */
+a {
+  text-decoration: none; /* Remove underline from links */
+  color: #007bff; /* Standard link color */
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: #0056b3;
+}
+
+/* Utility classes (optional, but can be helpful) */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+/* Add more as needed */
+
+/* Removing previously specific dark mode navbar styles as they are now in App.css */
+/* body.dark-mode .navbar ... */
+/* body.dark-mode .navbar a ... */
+/* body.dark-mode .navbar a:hover ... */

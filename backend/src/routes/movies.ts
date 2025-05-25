@@ -1,190 +1,170 @@
-import express, { Request, Response } from 'express';
-import { Movie } from '../models/Movie';
-import adminMiddleware from '../middleware/adminMiddleware';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
-import { MOVIES_FILE_PATH, readDataFromFile, saveDataToFile } from '../utils/fileUtils';
+import express, { Request, Response, Router } from 'express';
+import fs from 'fs';
+import path from 'path';
+import authMiddleware from '../middleware/authMiddleware'; // Corrected: Default import
+import adminMiddleware from '../middleware/adminMiddleware'; // Corrected: Assuming this is where isAdmin logic resides
+import { Movie } from '../models/Movie'; // Corrected: Using imported Movie type
+import { AuthenticatedRequest } from '../middleware/authMiddleware'; // Keep this if AuthenticatedRequest is used, or if authMiddleware/adminMiddleware expect it.
 
-const router = express.Router();
+const router: Router = express.Router();
 
-// Helper to process movies after reading (e.g., convert date strings to Date objects)
-function processRawMovies(rawMovies: any[]): Movie[] {
-  return rawMovies.map(movieData => {
-    if (!movieData || typeof movieData !== 'object') {
-      console.warn('Found invalid entry in movies data, skipping:', movieData);
-      return null;
-    }
+// For simplicity, if movies.json always in backend/data:
+// __dirname in this context (ts-node running a .ts file) should be the directory of the current file (backend/src/routes)
+const moviesFilePath = path.join(__dirname, '..', '..', 'data', 'movies.json'); 
 
-    const processedMovie: Partial<Movie> = { ...movieData }; // Start with a partial type
-    processedMovie.id = movieData.id || (Date.now() + Math.random()).toString(36); // Ensure ID
+// Local Movie interface removed, as it's imported from ../models/Movie
 
-    if (movieData.releaseDate) {
-      const parsedDate = new Date(movieData.releaseDate);
-      if (!isNaN(parsedDate.getTime())) {
-        processedMovie.releaseDate = parsedDate;
-      } else {
-        console.warn(`Invalid releaseDate format for movie titled "${movieData.title || 'Unknown'}": ${movieData.releaseDate}. Date will be undefined.`);
-        // releaseDate remains undefined in processedMovie if invalid
-      }
-    }
-    // Ensure all required fields for Movie are present before casting
-    if (!processedMovie.title || !processedMovie.description || !processedMovie.releaseDate || !processedMovie.genre || !processedMovie.director) {
-        console.warn('Skipping movie due to missing required fields after processing:', processedMovie);
-        return null;
-    }
+// Helper function to read movies
+const readMovies = (): Movie[] => {
+  const moviesData = fs.readFileSync(moviesFilePath, 'utf-8');
+  return JSON.parse(moviesData) as Movie[];
+};
 
-    return processedMovie as Movie;
-  }).filter(movie => movie !== null) as Movie[];
-}
+// Helper function to write movies
+const writeMovies = (movies: Movie[]) => {
+  fs.writeFileSync(moviesFilePath, JSON.stringify(movies, null, 2));
+};
 
-// Get all movies
-router.get('/', async (req: Request, res: Response) => {
-  console.log(`>>> [movies.ts] Request received for GET /api/movies at ${new Date().toISOString()}`);
+// GET all unique genres
+router.get('/genres', (req: Request, res: Response) => {
   try {
-    const rawMovies = await readDataFromFile<any>(MOVIES_FILE_PATH);
-    const movies = processRawMovies(rawMovies);
-    res.json(movies);
+    const movies = readMovies();
+    const genres = [...new Set(movies.map(movie => movie.genre.toLowerCase()))].sort();
+    res.json(genres);
   } catch (error) {
-    console.error('!!! [movies.ts] Error in GET /api/movies:', error);
-    res.status(500).json({
-        message: 'Internal server error while fetching movies',
-        errorDetails: (error instanceof Error) ? error.message : String(error)
-    });
+    console.error("Error fetching genres:", error);
+    res.status(500).json({ message: 'Error fetching genres' });
   }
 });
 
-// Get a specific movie by ID
-router.get('/:id', async (req: Request, res: Response) => {
-  console.log(`>>> [movies.ts] Request received for GET /api/movies/${req.params.id}`);
+// GET all movies with pagination, filtering, and search
+router.get('/', (req: Request, res: Response) => {
   try {
-    const rawMovies = await readDataFromFile<any>(MOVIES_FILE_PATH);
-    const movies = processRawMovies(rawMovies);
-    const movie = movies.find(m => m.id === req.params.id);
-    if (movie) {
-      res.json(movie);
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
+    let movies: Movie[] = readMovies(); // Ensure movies is typed with the imported Movie
+    
+    const genreQuery = req.query.genre ? (req.query.genre as string).toLowerCase() : null;
+    const searchQuery = req.query.search ? (req.query.search as string).toLowerCase() : null;
+
+    if (genreQuery && genreQuery !== 'all genres') {
+      movies = movies.filter(movie => movie.genre.toLowerCase() === genreQuery);
     }
-  } catch (error) {
-    console.error(`!!! [movies.ts] Error in GET /api/movies/${req.params.id}:`, error);
-    res.status(500).json({
-        message: 'Error retrieving movie',
-        errorDetails: (error instanceof Error) ? error.message : String(error)
+
+    if (searchQuery) {
+      movies = movies.filter(movie => 
+        movie.title.toLowerCase().includes(searchQuery) || 
+        (movie.description && movie.description.toLowerCase().includes(searchQuery)) // check if description exists
+      );
+    }
+    
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    
+    const paginatedMovies = movies.slice(startIndex, endIndex);
+    const totalMovies = movies.length;
+    const totalPages = Math.ceil(totalMovies / limit);
+
+    res.json({
+      movies: paginatedMovies,
+      currentPage: page,
+      totalPages: totalPages,
+      totalMovies: totalMovies,
+      limit: limit
     });
+  } catch (error) {
+    console.error("Error reading or filtering movies:", error);
+    res.status(500).json({ message: 'Error fetching movies' });
   }
 });
 
-// Create a new movie
-router.post('/', adminMiddleware, async (req: AuthenticatedRequest, res: Response) => {
-  console.log(`>>> [movies.ts] Request received for POST /api/movies`);
-  try {
-    const { title, description, releaseDate, genre, director, imageUrl, trailerUrl } = req.body;
-
-    if (!title || !description || !releaseDate || !genre || !director) {
-        return res.status(400).json({ message: 'Fields title, description, releaseDate, genre, director are required' });
-    }
-
-    const parsedDate = new Date(releaseDate);
-    if (isNaN(parsedDate.getTime())) {
-        return res.status(400).json({ message: 'Invalid releaseDate format. Please use a valid date string (e.g., YYYY-MM-DD).' });
-    }
-
-    const newMovie: Movie = {
-      id: (Date.now() + Math.random()).toString(36),
-      title,
-      description,
-      releaseDate: parsedDate, // Use the validated and parsed date
-      genre,
-      director,
-      imageUrl: imageUrl || undefined,
-      trailerUrl: trailerUrl || undefined,
-    };
-
-    const rawMovies = await readDataFromFile<any>(MOVIES_FILE_PATH);
-    // We process them to ensure consistency, though for new movie it's less critical here
-    let movies = processRawMovies(rawMovies); 
-    movies.push(newMovie);
-    await saveDataToFile<Movie>(MOVIES_FILE_PATH, movies);
-    res.status(201).json(newMovie);
-  } catch (error) {
-    console.error('!!! [movies.ts] Error in POST /api/movies:', error);
-    res.status(500).json({
-        message: 'Error creating movie',
-        errorDetails: (error instanceof Error) ? error.message : String(error)
-    });
-  }
-});
-
-// Update a movie
-router.put('/:id', adminMiddleware, async (req: AuthenticatedRequest, res: Response) => {
-  console.log(`>>> [movies.ts] Request received for PUT /api/movies/${req.params.id}`);
-  try {
-    const rawMovies = await readDataFromFile<any>(MOVIES_FILE_PATH);
-    let movies = processRawMovies(rawMovies);
-    const movieIndex = movies.findIndex(m => m.id === req.params.id);
-
-    if (movieIndex !== -1) {
-      const existingMovie = movies[movieIndex];
-      const { title, description, releaseDate, genre, director, imageUrl, trailerUrl } = req.body;
-      
-      // Create updatedMovie by merging, ensuring Date type for releaseDate
-      const updatedMovieData: Partial<Movie> = { ...existingMovie };
-
-      if (title !== undefined) updatedMovieData.title = title;
-      if (description !== undefined) updatedMovieData.description = description;
-      if (genre !== undefined) updatedMovieData.genre = genre;
-      if (director !== undefined) updatedMovieData.director = director;
-      if (imageUrl !== undefined) updatedMovieData.imageUrl = imageUrl;
-      if (trailerUrl !== undefined) updatedMovieData.trailerUrl = trailerUrl;
-
-      if (releaseDate !== undefined) {
-        const parsedDate = new Date(releaseDate);
-        if (!isNaN(parsedDate.getTime())) {
-            updatedMovieData.releaseDate = parsedDate;
+// GET a single movie by ID
+router.get('/:id', (req: Request, res: Response) => {
+    try {
+        const movies = readMovies();
+        const movie = movies.find(m => m.id === req.params.id);
+        if (movie) {
+            res.json(movie);
         } else {
-            // Option 1: Return error for invalid date
-            return res.status(400).json({ message: `Invalid releaseDate format for update: ${releaseDate}` });
-            // Option 2: Log warning and keep original date (as done by ...existingMovie)
-            // console.warn(`Invalid releaseDate format during update for movie ID ${req.params.id}: ${releaseDate}. Keeping original.`);
+            res.status(404).json({ message: 'Movie not found' });
         }
-      }
-      
-      movies[movieIndex] = updatedMovieData as Movie; // Cast to Movie after updates
-      await saveDataToFile<Movie>(MOVIES_FILE_PATH, movies);
-      res.json(movies[movieIndex]);
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
+    } catch (error) {
+        console.error(`Error fetching movie ${req.params.id}:`, error); // Corrected template literal
+        res.status(500).json({ message: 'Error fetching movie' });
     }
-  } catch (error) {
-    console.error(`!!! [movies.ts] Error in PUT /api/movies/${req.params.id}:`, error);
-    res.status(500).json({
-        message: 'Error updating movie',
-        errorDetails: (error instanceof Error) ? error.message : String(error)
-    });
-  }
 });
 
-// Delete a movie
-router.delete('/:id', adminMiddleware, async (req: AuthenticatedRequest, res: Response) => {
-  console.log(`>>> [movies.ts] Request received for DELETE /api/movies/${req.params.id}`);
-  try {
-    const rawMovies = await readDataFromFile<any>(MOVIES_FILE_PATH);
-    let movies = processRawMovies(rawMovies);
-    const movieIndex = movies.findIndex(m => m.id === req.params.id);
-
-    if (movieIndex !== -1) {
-      const deletedMovie = movies.splice(movieIndex, 1);
-      await saveDataToFile<Movie>(MOVIES_FILE_PATH, movies);
-      res.json(deletedMovie[0]);
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
+// POST a new movie (Admin only)
+// Assuming AuthenticatedRequest is used by authMiddleware/adminMiddleware or you intend to use req.user
+router.post('/', authMiddleware, adminMiddleware, (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const movies = readMovies();
+        const newMovieData = req.body;
+        
+        // Ensure all required fields from Movie interface are present or handled
+        const newMovie: Movie = {
+            id: Date.now().toString(), 
+            title: newMovieData.title,
+            description: newMovieData.description,
+            releaseDate: new Date(newMovieData.releaseDate), // Store as Date object, or .toISOString() if string needed
+            genre: newMovieData.genre,
+            director: newMovieData.director,
+            imageUrl: newMovieData.imageUrl,
+            trailerUrl: newMovieData.trailerUrl,
+        };
+        movies.push(newMovie);
+        writeMovies(movies);
+        res.status(201).json(newMovie);
+    } catch (error) {
+        console.error("Error creating movie:", error);
+        res.status(500).json({ message: 'Error creating movie' });
     }
-  } catch (error) {
-    console.error(`!!! [movies.ts] Error in DELETE /api/movies/${req.params.id}:`, error);
-    res.status(500).json({
-        message: 'Error deleting movie',
-        errorDetails: (error instanceof Error) ? error.message : String(error)
-    });
-  }
 });
 
-export default router; 
+// PUT update a movie (Admin only)
+router.put('/:id', authMiddleware, adminMiddleware, (req: AuthenticatedRequest, res: Response) => {
+    try {
+        let movies = readMovies();
+        const movieIndex = movies.findIndex(m => m.id === req.params.id);
+        if (movieIndex !== -1) {
+            const existingMovie = movies[movieIndex];
+            const updatedMovieData = req.body;
+
+            const updatedMovie: Movie = {
+                ...existingMovie,
+                ...updatedMovieData,
+                releaseDate: updatedMovieData.releaseDate ? new Date(updatedMovieData.releaseDate) : existingMovie.releaseDate, // Store as Date object
+            };
+            
+            movies[movieIndex] = updatedMovie;
+            writeMovies(movies);
+            res.json(updatedMovie);
+        } else {
+            res.status(404).json({ message: 'Movie not found' });
+        }
+    } catch (error) {
+        console.error(`Error updating movie ${req.params.id}:`, error); // Corrected template literal
+        res.status(500).json({ message: 'Error updating movie' });
+    }
+});
+
+// DELETE a movie (Admin only)
+router.delete('/:id', authMiddleware, adminMiddleware, (req: AuthenticatedRequest, res: Response) => {
+    try {
+        let movies = readMovies();
+        const initialLength = movies.length;
+        movies = movies.filter(m => m.id !== req.params.id);
+        if (movies.length < initialLength) {
+            writeMovies(movies);
+            res.status(204).send();
+        } else {
+            res.status(404).json({ message: 'Movie not found' });
+        }
+    } catch (error) {
+        console.error(`Error deleting movie ${req.params.id}:`, error); // Corrected template literal
+        res.status(500).json({ message: 'Error deleting movie' });
+    }
+});
+
+export default router;

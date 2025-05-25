@@ -1,144 +1,179 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import React, { useState, useEffect, useCallback, ChangeEvent } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
-
-// Align with backend/src/models/Movie.ts
-interface Movie {
-  id: string;
-  title: string;
-  description: string;
-  releaseDate: string; // Keep as string for simplicity, or parse Date
-  genre: string;
-  director: string;
-  imageUrl?: string;
-  trailerUrl?: string;
-}
+import './MovieListPage.css';
+import { Movie, PaginatedMoviesResponse } from '../types'; // Added PaginatedMoviesResponse
 
 const MovieListPage: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedGenre, setSelectedGenre] = useState<string>(''); // Default to empty, meaning 'All Genres'
   const [genres, setGenres] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const moviesPerPage = 6; // Number of movies per page
 
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:5000/api/movies'); // Assuming backend runs on port 5000
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: Movie[] = await response.json();
-        setMovies(data);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [moviesPerPage] = useState<number>(9); // Can be adjusted, should match backend or be configurable
 
-        // Extract unique genres
-        const uniqueGenres = Array.from(new Set(data.map(movie => movie.genre).filter(genre => genre)));
-        setGenres(uniqueGenres.sort());
+  const fetchMovies = useCallback(async (page: number, limit: number, genre?: string, search?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      if (genre && genre !== 'All Genres') params.append('genre', genre.toLowerCase()); // Send lowercase to backend
+      if (search) params.append('search', search);
 
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Explicitly type the expected response data structure
+      const response = await axios.get<PaginatedMoviesResponse>(`/api/movies?${params.toString()}`);
+      
+      // Now response.data is correctly typed
+      setMovies(response.data.movies || []); // Fallback to empty array if movies is undefined/null
+      setCurrentPage(response.data.currentPage || 1); // Fallback to 1 if undefined/null
+      setTotalPages(response.data.totalPages || 0);   // Fallback to 0 if undefined/null
 
-    fetchMovies();
+    } catch (err) {
+      setError('Failed to fetch movies. Please try again later.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  if (loading) return <p>Loading movies...</p>;
-  if (error) return <p>Error loading movies: {error}</p>;
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        // Fetch genres first
+        const genresResponse = await axios.get<string[]>('/api/movies/genres');
+        setGenres(['All Genres', ...genresResponse.data]);
+        // Then fetch movies for the initial page
+        // We pass selectedGenre directly, it will be empty string initially (meaning 'All Genres')
+        await fetchMovies(currentPage, moviesPerPage, selectedGenre, searchTerm); 
+      } catch (error) {
+        console.error("Failed to fetch initial data", error);
+        setError('Failed to load initial data. Please try again.');
+        setGenres(['All Genres']); // Default to prevent errors
+      }
+      // setLoading(false); // This setLoading is for the initial data load, fetchMovies has its own
+    };
+    fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps 
+  }, []); // Run only once on mount
+
+  // This useEffect will run when currentPage, selectedGenre, or searchTerm changes (AFTER initial load)
+  useEffect(() => {
+    const isInitialMount = currentPage === 1 && selectedGenre === '' && searchTerm === '' && movies.length === 0;
+    if (!isInitialMount && !loading) { // Avoid running on initial mount if fetchInitialData is handling it
+        fetchMovies(currentPage, moviesPerPage, selectedGenre, searchTerm);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, selectedGenre, searchTerm]); 
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-    setCurrentPage(1); // Reset to first page on search change
+    setCurrentPage(1); 
   };
 
   const handleGenreChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedGenre(event.target.value);
-    setCurrentPage(1); // Reset to first page on genre change
+    setCurrentPage(1); 
   };
 
-  const filteredMovies = movies
-    .filter(movie => 
-      selectedGenre ? movie.genre === selectedGenre : true
-    )
-    .filter(movie => 
-      movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-  // Pagination logic
-  const indexOfLastMovie = currentPage * moviesPerPage;
-  const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = filteredMovies.slice(indexOfFirstMovie, indexOfLastMovie);
-  const totalPages = Math.ceil(filteredMovies.length / moviesPerPage);
-
-  const paginate = (pageNumber: number) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
+  
+  // The filtering logic is now mostly handled by the backend.
+  // Client-side filtering might still be applied if desired on the current page's data,
+  // but primary filtering (search, genre) should be done via API params for server-side pagination.
+  // const filteredMovies = movies;
+
+  if (loading && movies.length === 0) {
+    return <div className="movie-list-loading" aria-live="polite">Loading movies...</div>;
+  }
+
+  if (error) {
+    return <div className="movie-list-error" role="alert" aria-live="assertive">Error: {error}</div>;
+  }
 
   return (
-    <div>
-      <h2>Movies</h2>
-
-      {/* Search and Filter Controls */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '20px' }}>
-        <input 
-          type="text" 
-          placeholder="Search by title..." 
-          value={searchTerm} 
-          onChange={handleSearchChange} 
-          style={{ padding: '8px', width: '300px' }}
+    <div className="movie-list-page" role="main">
+      <h1 className="movie-list-title">Explore Our Movie Collection</h1>
+      <div className="filter-bar">
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="search-input"
+          aria-label="Search movies by title"
         />
         <select 
           value={selectedGenre} 
           onChange={handleGenreChange} 
-          style={{ padding: '8px' }}
+          className="genre-select"
+          aria-label="Select movie genre"
         >
-          <option value="">All Genres</option>
           {genres.map(genre => (
-            <option key={genre} value={genre}>{genre}</option>
+            <option key={genre} value={genre}>{genre.charAt(0).toUpperCase() + genre.slice(1)}</option>
           ))}
         </select>
       </div>
 
-      {filteredMovies.length === 0 ? (
-        <p>No movies available matching your criteria.</p>
-      ) : (
-        <ul>
-          {currentMovies.map(movie => (
-            <li key={movie.id} style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #eee', listStyleType: 'none' }}>
-              {movie.imageUrl && (
-                <img 
-                  src={movie.imageUrl} 
-                  alt={movie.title} 
-                  style={{ width: '100px', height: 'auto', marginRight: '20px', float: 'left' }} 
-                />
-              )}
-              <h3><Link to={`/movie/${movie.id}`}>{movie.title}</Link></h3>
-              <p>{movie.description}</p>
-              <div style={{ clear: 'both' }}></div>
-            </li>
-          ))}
-        </ul>
+      {loading && movies.length > 0 && 
+        <p className="movie-list-loading-inline" aria-live="polite">Updating list...</p>
+      } 
+      
+      {movies.length === 0 && !loading && (
+        <div className="no-movies-found" aria-live="polite">No movies found matching your criteria.</div>
       )}
 
-      {/* Pagination Controls */}
+      <div className="movie-grid">
+        {movies.map(movie => (
+          <div key={movie.id} className="movie-card-item">
+            <img 
+              src={movie.imageUrl || 'https://via.placeholder.com/300x450.png?text=No+Image'} 
+              alt={movie.title} 
+              className="movie-card-image" 
+            />
+            <div className="movie-card-content">
+              <h3 className="movie-card-title">{movie.title}</h3>
+              {/*
+              <p className="movie-card-director">Director: {movie.director}</p>
+              <p className="movie-card-genre">Genre: {movie.genre}</p>
+              <p className="movie-card-release">Released: {new Date(movie.releaseDate).toLocaleDateString()}</p>
+              <p className="movie-card-description">
+                {movie.description.substring(0, 100)}{movie.description.length > 100 ? '...' : ''}
+              </p>
+              */}
+              <Link to={`/movie/${movie.id}`} className="movie-card-link">View Details</Link>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {totalPages > 1 && (
-        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-          <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+        <div className="pagination-controls">
+          <button 
+            onClick={() => handlePageChange(currentPage - 1)} 
+            disabled={currentPage === 1 || loading}
+            aria-label="Go to previous page of movies"
+          >
             Previous
           </button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>
+          <span aria-label={`Page ${currentPage} of ${totalPages}`} aria-live="polite">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button 
+            onClick={() => handlePageChange(currentPage + 1)} 
+            disabled={currentPage === totalPages || loading}
+            aria-label="Go to next page of movies"
+          >
             Next
           </button>
         </div>
@@ -147,4 +182,4 @@ const MovieListPage: React.FC = () => {
   );
 };
 
-export default MovieListPage; 
+export default MovieListPage;

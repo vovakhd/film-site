@@ -61,25 +61,42 @@ const Navbar = () => {
   };
 
   return (
-    <nav>
-      <ul>
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/movies">Movies</Link></li>
-        {isAuthenticated && userRole === 'admin' && (
-          <li><Link to="/admin">Admin</Link></li>
-        )}
-        {isAuthenticated ? (
-          <>
-            <li><span>Logged In ({userRole})</span></li>
-            <li><button onClick={handleLogout}>Logout</button></li>
-          </>
-        ) : (
-          <>
-            <li><Link to="/login">Login</Link></li>
-            <li><Link to="/register">Register</Link></li>
-          </>
-        )}
-      </ul>
+    <nav className="navbar" role="navigation" aria-label="Main navigation">
+      <div className="navbar-container">
+        <Link to="/" className="navbar-logo">FilmSite</Link>
+        <ul className="nav-menu">
+          <li className="nav-item">
+            <Link to="/" className="nav-links">Home</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/movies" className="nav-links">Movies</Link>
+          </li>
+          {isAuthenticated && userRole === 'admin' && (
+            <li className="nav-item">
+              <Link to="/admin" className="nav-links">Admin</Link>
+            </li>
+          )}
+          {isAuthenticated ? (
+            <>
+              <li className="nav-item">
+                <span className="nav-links-user">Logged In ({userRole})</span>
+              </li>
+              <li className="nav-item">
+                <button onClick={handleLogout} className="nav-links-button">Logout</button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li className="nav-item">
+                <Link to="/login" className="nav-links">Login</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/register" className="nav-links">Register</Link>
+              </li>
+            </>
+          )}
+        </ul>
+      </div>
     </nav>
   );
 };

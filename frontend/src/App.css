@@ -36,3 +36,157 @@
     transform: rotate(360deg);
   }
 }
+
+/* General App Styles */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Navbar Styles */
+.navbar {
+  background: linear-gradient(90deg, rgb(28, 27, 27) 0%, rgb(26, 23, 23) 100%);
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  border-bottom: 1px solid #2c2c2c; /* Subtle border */
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between; /* Pushes logo to left and menu to right */
+  height: 80px;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px; /* Consistent with main container */
+  padding: 0 20px; /* Padding consistent with main container */
+}
+
+.navbar-logo {
+  color: #fff;
+  justify-self: start;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  font-weight: bold; /* Make logo bolder */
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  text-align: center;
+}
+
+.nav-item {
+  height: 80px; /* Ensure nav items take full height of navbar */
+}
+
+.nav-links {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0 1rem;
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+}
+
+.nav-links:hover {
+  color: #bb86fc; /* Highlight color for hover */
+  /* border-bottom: 3px solid #bb86fc; Optional: Add an underline effect on hover */
+}
+
+.nav-links-user {
+  color: #ccc; /* Lighter color for user status text */
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0 1rem;
+  height: 100%;
+}
+
+.nav-links-button {
+  color: #fff;
+  background-color: transparent; /* Make button background transparent */
+  border: 1px solid #fff; /* White border */
+  padding: 8px 16px; /* Padding inside the button */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-left: 1rem; /* Add some margin to the left */
+}
+
+.nav-links-button:hover {
+  background-color: #bb86fc; /* Highlight color on hover */
+  color: #000; /* Text color on hover */
+  border-color: #bb86fc; /* Border color on hover */
+}
+
+
+/* Responsive Design for Navbar */
+@media screen and (max-width: 960px) {
+  .navbar-container {
+    /* Adjust padding for smaller screens if needed */
+  }
+
+  .nav-menu {
+    /* Stack menu items vertically or implement a burger menu for smaller screens */
+    /* This is a basic example; a burger menu would require JavaScript */
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 80px; /* Position below the navbar */
+    left: -100%; /* Hide off-screen initially */
+    opacity: 1;
+    transition: all 0.5s ease;
+    background: #1c1b1b; /* Background for dropdown */
+  }
+
+  .nav-menu.active { /* Class to toggle visibility */
+    left: 0;
+    opacity: 1;
+    transition: all 0.5s ease;
+    z-index: 1;
+  }
+
+  .nav-item {
+    width: 100%;
+    border-top: 1px solid #2c2c2c; /* Separator for stacked items */
+  }
+  
+  .nav-item:first-child {
+    border-top: none; /* No border for the first item */
+  }
+
+  .nav-links {
+    text-align: center;
+    padding: 1.5rem; /* Increase padding for touch targets */
+    width: 100%;
+    display: table;
+  }
+
+  .nav-links:hover {
+    color: #bb86fc;
+    border-bottom: none; /* Remove bottom border for stacked items */
+  }
+  
+  .navbar-logo {
+    /* Adjust logo size or position if needed */
+  }
+
+  /* Add a burger icon/menu toggle button here */
+  /* This would typically be an icon that, when clicked, toggles the .active class on .nav-menu */
+}
+
+/* Ensure existing .App-logo, .App-header, etc., styles don't conflict or are updated as needed. */
+/* For now, let's assume they are either not critical for this step or will be addressed later. */

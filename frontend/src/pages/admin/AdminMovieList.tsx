@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import './AdminPage.css'; // Import the shared admin CSS
 
 interface MovieFromServer {
   id: string;
@@ -28,8 +29,18 @@ const AdminMovieList: React.FC = () => {
           const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
           throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
-        const data: MovieFromServer[] = await response.json();
-        setMovies(data);
+        const data = await response.json();
+        // Check if data is an array directly, or if it's an object with a 'movies' property
+        if (Array.isArray(data)) {
+          setMovies(data);
+        } else if (data && Array.isArray(data.movies)) {
+          setMovies(data.movies);
+        } else {
+          // Handle unexpected data structure
+          console.error("Unexpected data structure from /api/movies:", data);
+          setMovies([]); // Set to empty array to prevent .map error
+          setError("Received unexpected data format from server.");
+        }
       } catch (err: any) {
         setError(err.message || 'Failed to fetch movies.');
         console.error("Failed to fetch movies:", err);
@@ -72,38 +83,53 @@ const AdminMovieList: React.FC = () => {
   };
 
   if (loading) return <p>Loading movies...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error fetching movies: {error}</p>;
+  if (error) return <div className="admin-page-container"><p className="error-message-admin">Error fetching movies: {error}</p></div>;
 
   return (
-    <div>
-      <h2>Manage Movies (Admin)</h2>
-      <Link to="/admin/movies/new" style={{ marginBottom: '20px', display: 'inline-block' }}>
-        <button type="button">Add New Movie</button>
+    <div className="admin-page-container">
+      <h2>Manage Movies</h2>
+      <Link to="/admin/movies/new" className="admin-button-link">
+        Add New Movie
       </Link>
       
+      {/* Display success/error messages from delete operation if any */}
+      {error && <p className="error-message-admin">{error}</p>} 
+      {/* {successMessage && <p className="success-message-admin">{successMessage}</p>} */}
+      {/* Consider adding a successMessage state for delete success indication */} 
+
       {movies.length === 0 ? (
         <p>No movies found. Add one!</p>
       ) : (
-        <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse' }}>
+        <table className="admin-table">
           <thead>
             <tr>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Title</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Director</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Genre</th>
-              <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>Actions</th>
+              <th>Image</th>
+              <th>Title</th>
+              <th>Director</th>
+              <th>Genre</th>
+              <th>Release Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {movies.map((movie) => (
-              <tr key={movie.id}>
-                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{movie.title}</td>
-                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{movie.director}</td>
-                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{movie.genre}</td>
-                <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
-                  <Link to={`/admin/movies/edit/${movie.id}`} style={{ marginRight: '10px' }}>
-                    <button type="button">Edit</button>
+              <tr key={movie.id}>  
+                <td>
+                  {movie.imageUrl && 
+                    <img src={movie.imageUrl} alt={movie.title} className="thumbnail" />
+                  }
+                </td>
+                <td>{movie.title}</td>
+                <td>{movie.director}</td>
+                <td>{movie.genre}</td>
+                <td>{movie.releaseDate ? new Date(movie.releaseDate).toLocaleDateString() : 'N/A'}</td>
+                <td className="action-buttons">
+                  <Link to={`/admin/movies/edit/${movie.id}`} className="edit-button">
+                    Edit
                   </Link>
-                  <button type="button" onClick={() => handleDeleteMovie(movie.id)}>Delete</button>
+                  <button type="button" onClick={() => handleDeleteMovie(movie.id)} className="delete-button">
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

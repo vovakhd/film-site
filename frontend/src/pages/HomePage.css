@@ -1,0 +1,161 @@
+/* HomePage.css */
+
+/* Hero Section */
+.hero-section {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW92aWVzfGVufDB8fDB8fHww&w=1000&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Parallax-like effect */
+  color: #fff;
+  padding: 6rem 2rem; /* Increased padding */
+  text-align: center;
+  position: relative;
+  min-height: 70vh; /* Make hero section taller */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* .hero-overlay can be used if you want a color overlay on top of the image, already handled by linear-gradient */
+
+.hero-content {
+  max-width: 800px;
+  z-index: 1; /* Ensure content is above any pseudo-elements if used for overlay */
+}
+
+.hero-title {
+  font-size: 3.5rem; /* Larger title */
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Text shadow for readability */
+}
+
+.hero-subtitle {
+  font-size: 1.5rem; /* Larger subtitle */
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.hero-button {
+  padding: 1rem 2.5rem; /* Larger button */
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #bb86fc; /* Accent color */
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.hero-button:hover {
+  background-color: #a06cd5; /* Darker accent */
+  transform: translateY(-2px);
+}
+
+/* Styles for the content area below the hero section */
+.home-page-content {
+  padding: 2rem; /* Renamed from .home-page to avoid conflict */
+  text-align: center;
+}
+
+
+/* Features Section - Enhanced */
+.features-section {
+  margin-top: 1rem; /* Reduced margin-top as hero takes more space */
+  padding-top: 2rem;
+  /* border-top: 1px solid #eee; Optional: Keep if desired */
+}
+
+.features-section h2 {
+  font-size: 2.2rem; /* Slightly larger */
+  margin-bottom: 2rem; /* Increased margin */
+  color: #333;
+}
+
+body.dark-mode .features-section h2 {
+  color: #e0e0e0;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
+  gap: 2.5rem; /* Increased gap */
+}
+
+.feature-item {
+  padding: 2rem; /* Increased padding */
+  border: 1px solid #ddd;
+  border-radius: 10px; /* More rounded corners */
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08); /* Softer shadow */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content */
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+body.dark-mode .feature-item {
+  border-color: #444;
+  background-color: #1e1e1e;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.feature-icon {
+  font-size: 2.5rem; /* Larger icons */
+  margin-bottom: 1rem;
+  color: #bb86fc; /* Accent color for icons */
+}
+
+.feature-item h3 {
+  font-size: 1.6rem; /* Larger feature title */
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+body.dark-mode .feature-item h3 {
+  color: #e0e0e0;
+}
+
+.feature-item p {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+body.dark-mode .feature-item p {
+  color: #b0b0b0;
+}
+
+/* Ensure previous .home-page h1, .lead styles are either removed or adjusted 
+   if they were meant for the old structure and might conflict. 
+   The hero section now has its own specific typography. */
+
+/* Weather Widget Styling - REMOVED as it is handled by WeatherWidget.css */
+/*
+.weather-widget {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #ddd; 
+  border-radius: 8px;
+  background-color: #f9f9f9; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .weather-widget {
+  border: 1px solid #444; 
+  background-color: #2a2a2a; 
+}
+
+.weather-widget h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+} 
+*/ 
