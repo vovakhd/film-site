@@ -7,13 +7,17 @@
   background-position: center;
   background-attachment: fixed; /* Parallax-like effect */
   color: #fff;
-  padding: 6rem 2rem; /* Increased padding */
+  padding: 6rem 0; /* Vertical padding, horizontal padding removed */
   text-align: center;
   position: relative;
   min-height: 70vh; /* Make hero section taller */
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100vw; /* Full viewport width */
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
 
 /* .hero-overlay can be used if you want a color overlay on top of the image, already handled by linear-gradient */
@@ -21,6 +25,7 @@
 .hero-content {
   max-width: 800px;
   z-index: 1; /* Ensure content is above any pseudo-elements if used for overlay */
+  padding: 0 2rem; /* Add horizontal padding here */
 }
 
 .hero-title {
