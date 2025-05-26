@@ -1,6 +1,5 @@
 import React, { useEffect, useState, FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-// import { Link } from 'react-router-dom'; // Link seems unused here, consider removing if not needed later
 import './MovieDetailPage.css'; // Import the CSS file
 
 // Align with backend models
@@ -17,11 +16,10 @@ interface Movie {
 
 interface Comment {
   id: string;
-  userId: string; // Received from backend, useful for client-side checks if needed
-  username: string; // Add username here
+  userId: string; 
+  username: string; // Username is expected from backend
   text: string;
   createdAt: string; // Or Date
-  // username?: string; // Future: Backend could populate this
 }
 
 const MovieDetailPage: React.FC = () => {

@@ -13,43 +13,57 @@ interface MovieFromServer {
   trailerUrl?: string;
 }
 
+// Define the structure of the API response for movies if it includes pagination
+interface PaginatedMoviesResponse {
+  movies: MovieFromServer[];
+  currentPage: number;
+  totalPages: number;
+  totalMovies: number;
+  limit: number;
+}
+
 const AdminMovieList: React.FC = () => {
   const [movies, setMovies] = useState<MovieFromServer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchMovies = async (page: number = 1) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('/api/movies');
+        const response = await fetch(`/api/movies?page=${page}&limit=10`);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
           throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        // Check if data is an array directly, or if it's an object with a 'movies' property
-        if (Array.isArray(data)) {
-          setMovies(data);
-        } else if (data && Array.isArray(data.movies)) {
+        const data: PaginatedMoviesResponse = await response.json();
+        
+        if (data && Array.isArray(data.movies)) {
           setMovies(data.movies);
+          setCurrentPage(data.currentPage);
+          setTotalPages(data.totalPages);
         } else {
-          // Handle unexpected data structure
-          console.error("Unexpected data structure from /api/movies:", data);
-          setMovies([]); // Set to empty array to prevent .map error
+          console.error("Unexpected data structure from /api/movies for pagination:", data);
+          setMovies([]);
+          setTotalPages(0);
           setError("Received unexpected data format from server.");
         }
       } catch (err: any) {
         setError(err.message || 'Failed to fetch movies.');
         console.error("Failed to fetch movies:", err);
+        setMovies([]);
+        setTotalPages(0);
       } finally {
         setLoading(false);
       }
     };
-    fetchMovies();
-  }, []);
+    fetchMovies(currentPage);
+  }, [currentPage]);
 
   const handleDeleteMovie = async (movieId: string) => {
     if (!window.confirm('Are you sure you want to delete this movie?')) {
@@ -82,6 +96,12 @@ const AdminMovieList: React.FC = () => {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
   if (loading) return <p>Loading movies...</p>;
   if (error) return <div className="admin-page-container"><p className="error-message-admin">Error fetching movies: {error}</p></div>;
 
@@ -92,49 +112,67 @@ const AdminMovieList: React.FC = () => {
         Add New Movie
       </Link>
       
-      {/* Display success/error messages from delete operation if any */}
-      {error && <p className="error-message-admin">{error}</p>} 
-      {/* {successMessage && <p className="success-message-admin">{successMessage}</p>} */}
-      {/* Consider adding a successMessage state for delete success indication */} 
+      {error && <p className="error-message-admin">{error}</p>}
 
-      {movies.length === 0 ? (
+      {movies.length === 0 && !loading ? (
         <p>No movies found. Add one!</p>
       ) : (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Title</th>
-              <th>Director</th>
-              <th>Genre</th>
-              <th>Release Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {movies.map((movie) => (
-              <tr key={movie.id}>  
-                <td>
-                  {movie.imageUrl && 
-                    <img src={movie.imageUrl} alt={movie.title} className="thumbnail" />
-                  }
-                </td>
-                <td>{movie.title}</td>
-                <td>{movie.director}</td>
-                <td>{movie.genre}</td>
-                <td>{movie.releaseDate ? new Date(movie.releaseDate).toLocaleDateString() : 'N/A'}</td>
-                <td className="action-buttons">
-                  <Link to={`/admin/movies/edit/${movie.id}`} className="edit-button">
-                    Edit
-                  </Link>
-                  <button type="button" onClick={() => handleDeleteMovie(movie.id)} className="delete-button">
-                    Delete
-                  </button>
-                </td>
+        <>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Director</th>
+                <th>Genre</th>
+                <th>Release Date</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {movies.map((movie) => (
+                <tr key={movie.id}>  
+                  <td>
+                    {movie.imageUrl && 
+                      <img src={movie.imageUrl} alt={movie.title} className="thumbnail" />
+                    }
+                  </td>
+                  <td>{movie.title}</td>
+                  <td>{movie.director}</td>
+                  <td>{movie.genre}</td>
+                  <td>{movie.releaseDate ? new Date(movie.releaseDate).toLocaleDateString() : 'N/A'}</td>
+                  <td className="action-buttons">
+                    <Link to={`/admin/movies/edit/${movie.id}`} className="edit-button">
+                      Edit
+                    </Link>
+                    <button type="button" onClick={() => handleDeleteMovie(movie.id)} className="delete-button">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {totalPages > 1 && (
+            <div className="pagination-controls">
+              <button 
+                onClick={() => handlePageChange(currentPage - 1)} 
+                disabled={currentPage === 1 || loading}
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                onClick={() => handlePageChange(currentPage + 1)} 
+                disabled={currentPage === totalPages || loading}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

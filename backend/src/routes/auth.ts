@@ -8,6 +8,12 @@ import { User } from '../models/User';
 const router = express.Router();
 
 const USERS_FILE_PATH = path.resolve(__dirname, '..', '..', 'data', 'users.json');
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined in .env file.");
+  process.exit(1); // Зупинити процес, якщо секрет не визначено
+}
 
 // Helper to ensure data directory and users.json exist
 async function ensureUsersFileExists() {
@@ -108,7 +114,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role /* Add role to token payload */ }, 
-      'your-secret-key', // TODO: Replace with environment variable
+      JWT_SECRET, // Використовуємо змінну оточення
       { expiresIn: '1h' }
     );
 

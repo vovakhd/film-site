@@ -7,31 +7,43 @@ export interface AuthenticatedRequest extends Request {
   user?: string | jwt.JwtPayload; // or a more specific user type
 }
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  console.log('AuthMiddleware triggered'); 
+
   const authHeader = req.headers.authorization;
+  console.log('Auth Header:', authHeader);
+
+  if (!JWT_SECRET) {
+    console.error("AuthMiddleware: JWT_SECRET is not defined!");
+    // Важливо не надсилати відповідь клієнту, якщо секрет не налаштовано на сервері,
+    // а логувати критичну помилку і, можливо, зупиняти додаток або повертати загальну помилку сервера.
+    // process.exit(1); // Або інший механізм обробки критичної помилки конфігурації
+    return res.status(500).json({ message: 'Server configuration error' });
+  }
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.substring(7); // Витягти токен після "Bearer "
+    console.log('Token extracted:', token);
 
     if (!token) {
+      console.log('No token part after Bearer');
       return res.status(401).json({ message: 'No token provided, authorization denied' });
     }
 
-    try {
-      // Verify token
-      // TODO: Use a proper secret key from environment variables
-      const decoded = jwt.verify(token, 'your-secret-key'); 
-      req.user = decoded; // Attach user payload to request object
-      next(); // Proceed to the next middleware or route handler
-    } catch (err) {
-      if (err instanceof jwt.JsonWebTokenError) {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        console.error('JWT Verification Error:', err.message, 'Token tried:', token);
         return res.status(401).json({ message: 'Token is not valid' });
-      } else {
-        return res.status(500).json({ message: 'Server error during token validation'});
       }
-    }
+      req.user = decoded;
+      console.log('Token verified, user:', decoded);
+      next();
+    });
   } else {
-    return res.status(401).json({ message: 'No authorization header, authorization denied' });
+    console.log('No token provided or incorrect format (missing Bearer prefix)');
+    return res.status(401).json({ message: 'Authorization token is required and must be Bearer type' });
   }
 };
 

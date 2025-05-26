@@ -251,4 +251,56 @@ body.dark-mode .error-message-admin {
     color: #f48fb1;
     background-color: #4a272a; 
     border-color: #8b444b;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee; /* Light mode separator */
+}
+
+body.dark-mode .pagination-controls {
+  border-top-color: #444; /* Dark mode separator */
+}
+
+.pagination-controls button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.pagination-controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+body.dark-mode .pagination-controls button {
+  background-color: #0056b3;
+}
+
+body.dark-mode .pagination-controls button:hover:not(:disabled) {
+  background-color: #004085;
+}
+
+body.dark-mode .pagination-controls button:disabled {
+  background-color: #555;
+  color: #aaa;
+}
+
+.pagination-controls span {
+  margin: 0 0.5rem;
+  font-size: 0.9rem;
 } 

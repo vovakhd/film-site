@@ -110,9 +110,6 @@ function App() {
     } else {
       document.body.classList.remove('dark-mode');
     }
-    // Optional: Set an interval to check the time periodically if needed
-    // const intervalId = setInterval(() => { ... }, 60000); // Check every minute
-    // return () => clearInterval(intervalId);
   }, []);
 
   return (

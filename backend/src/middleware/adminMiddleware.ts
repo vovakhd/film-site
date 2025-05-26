@@ -1,48 +1,38 @@
 import { Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from './authMiddleware'; // Reuse AuthenticatedRequest
 
 // Define a more specific type for user payload if needed, including role
-interface UserPayload extends jwt.JwtPayload {
+// This interface should match the payload structure set during token signing in auth.ts
+interface UserPayload {
   id: string;
   username: string;
   role: 'user' | 'admin';
+  // Add any other fields that are in your JWT payload
+  iat?: number; // Issued at (standard JWT claim)
+  exp?: number; // Expiration time (standard JWT claim)
 }
 
 const adminMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  // First, ensure user is authenticated (authMiddleware should have run or token is checked here)
-  // For simplicity, we'll re-check token presence and basic verification like in authMiddleware
-  // In a real app, you might chain middlewares or have authMiddleware set req.user reliably.
+  console.log('AdminMiddleware triggered');
+  // authMiddleware should have already run and populated req.user if the token was valid.
+  // We just need to check the role on req.user.
 
-  const authHeader = req.headers.authorization;
+  if (!req.user) {
+    // This case should ideally not be reached if authMiddleware is correctly placed before adminMiddleware
+    // and correctly calls next() only on successful auth.
+    console.error('AdminMiddleware: req.user is not populated. authMiddleware might be missing or failed before adminMiddleware.');
+    return res.status(401).json({ message: 'Authentication required but not provided or failed.' });
+  }
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+  const user = req.user as UserPayload; // Type assertion based on the payload structure
+  console.log('AdminMiddleware: Checking role for user:', user);
 
-    if (!token) {
-      return res.status(401).json({ message: 'No token provided, authorization denied for admin route' });
-    }
-
-    try {
-      // TODO: Use a proper secret key from environment variables
-      const decoded = jwt.verify(token, 'your-secret-key') as UserPayload; 
-      
-      // Check if user has admin role
-      if (decoded && decoded.role === 'admin') {
-        req.user = decoded; // Attach user payload (which includes role) to request object
-        next(); // Proceed if admin
-      } else {
-        return res.status(403).json({ message: 'User is not authorized to perform this action (not an admin)' });
-      }
-    } catch (err) {
-      if (err instanceof jwt.JsonWebTokenError) {
-        return res.status(401).json({ message: 'Token is not valid for admin route' });
-      } else {
-        return res.status(500).json({ message: 'Server error during admin token validation' });
-      }
-    }
+  if (user.role === 'admin') {
+    console.log('AdminMiddleware: User is admin. Proceeding.');
+    next(); // User is admin, proceed to the next handler
   } else {
-    return res.status(401).json({ message: 'No authorization header, authorization denied for admin route' });
+    console.log('AdminMiddleware: User is not admin. Access denied.');
+    return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
   }
 };
 

@@ -8,6 +8,7 @@ body {
   background-color: #f4f4f4; /* Light mode background */
   color: #333; /* Light mode text color */
   line-height: 1.6; /* Improved readability */
+  overflow-x: hidden;
 }
 
 code {
