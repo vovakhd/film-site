@@ -47,7 +47,6 @@ const AdminMovieEdit: React.FC = () => {
         }
         const data: MovieDataFromServer = await response.json();
         
-        // Конвертуємо ISO дату в YYYY-MM-DD для <input type="date">
         let releaseDateForInput = '';
         if (data.releaseDate) {
             const dateObj = new Date(data.releaseDate);

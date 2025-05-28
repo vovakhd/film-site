@@ -8,8 +8,7 @@ const LoginPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  // Check if user is already logged in (e.g., by checking for a token)
-  // This is a simple check, could be moved to a global auth context later
+  // Check if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -41,11 +40,8 @@ const LoginPage: React.FC = () => {
       if (data.token) {
         localStorage.setItem('token', data.token);
         setMessage('Login successful!');
-        // TODO: Update auth state in app (e.g., using Context API or Redux)
-        // For now, just navigate to home and force a re-render of Navbar if needed
         navigate('/'); 
-        // A more robust way to update Navbar would be through shared state
-        window.dispatchEvent(new Event('authChange')); // Simple event to notify navbar
+        window.dispatchEvent(new Event('authChange'));
       } else {
         throw new Error('Login successful, but no token received.');
       }

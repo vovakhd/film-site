@@ -16,24 +16,24 @@ const HomePage = () => {
         {/* </div> */}
       </section>
 
-      <div className="home-page-content"> {/* Wrapper for content below hero */}
+      <div className="home-page-content">
         <div className="features-section">
-          <h2>Why Choose FilmSite?</h2> {/* Updated title */}
+          <h2>Why Choose FilmSite?</h2>
           <div className="features-grid">
             <div className="feature-item">
-              <i className="feature-icon">🎬</i> {/* Example icon, replace with actual icons later */}
+              <i className="feature-icon">🎬</i>
               <h3>Extensive Collection</h3>
               <p>From blockbusters to timeless classics, find it all here.</p>
             </div>
             <div className="feature-item">
-              <i className="feature-icon">💬</i> {/* Example icon */}
+              <i className="feature-icon">💬</i>
               <h3>Community Driven</h3>
               <p>Engage in discussions, read and write reviews.</p>
             </div>
             <div className="feature-item">
-              <i className="feature-icon">✨</i> {/* Example icon */}
-              <h3>Personalized for You</h3>
-              <p>Create watchlists and get recommendations.</p>
+              <i className="feature-icon">🔍</i>
+              <h3>Easy Search</h3>
+              <p>Quickly find movies using search and genre filters.</p>
             </div>
           </div>
         </div>

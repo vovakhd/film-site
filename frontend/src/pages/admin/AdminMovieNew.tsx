@@ -5,7 +5,7 @@ import './AdminPage.css'; // Import the shared admin CSS
 interface MovieFormData {
   title: string;
   description: string;
-  releaseDate: string; // Будемо відправляти як рядок YYYY-MM-DD
+  releaseDate: string;
   genre: string;
   director: string;
   imageUrl?: string;
@@ -42,7 +42,7 @@ const AdminMovieNew: React.FC = () => {
       return;
     }
 
-    // Проста валідація на клієнті (можна розширити)
+    // Проста валідація на клієнті
     if (!formData.title || !formData.description || !formData.releaseDate || !formData.genre || !formData.director) {
       setError('Please fill in all required fields: Title, Description, Release Date, Genre, Director.');
       return;

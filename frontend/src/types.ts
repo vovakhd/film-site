@@ -2,20 +2,18 @@ export interface Movie {
   id: string;
   title: string;
   description: string;
-  releaseDate: string; // Keep as string for API consistency, parse to Date in UI if needed
+  releaseDate: string;
   genre: string;
   director: string;
-  imageUrl?: string; // Matching movies.json
+  imageUrl?: string;
   trailerUrl?: string;
-  // image?: string; // This was used in MovieListPage, but movies.json has imageUrl. Consolidate to imageUrl.
 }
 
-// Add other shared types here if any, for example, for User or Comment
 export interface User {
     id: string;
     username: string;
     email: string;
-    role: 'user' | 'admin'; // Example roles
+    role: 'user' | 'admin';
 }
 
 export interface Comment {
@@ -24,7 +22,7 @@ export interface Comment {
     username: string;
     movieId: string;
     text: string;
-    createdAt: string; // Keep as string for API consistency
+    createdAt: string;
 }
 
 export interface PaginatedMoviesResponse {

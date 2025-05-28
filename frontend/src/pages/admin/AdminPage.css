@@ -3,7 +3,7 @@
 /* General layout for admin pages */
 .admin-page-container {
   padding: 2rem;
-  max-width: 1200px; /* Or your preferred max-width for admin sections */
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -18,12 +18,11 @@ body.dark-mode .admin-page-container h2 {
   color: #e0e0e0;
 }
 
-/* Basic Table Styling (can be expanded) */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle shadow for tables */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .admin-table th,

@@ -9,11 +9,10 @@ import commentRoutes from './routes/comments'; // Import comment routes
 
 const app = express();
 const port = process.env.PORT || 5000;
-
-// Middleware для логування ВСІХ запитів
+  
 app.use((req, res, next) => {
   console.log(`>>> [GLOBAL] Request received: ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
-  next(); // Передаємо управління наступному middleware
+  next();
 });
 
 app.use(cors());

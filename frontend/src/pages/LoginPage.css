@@ -72,7 +72,6 @@ body.dark-mode .login-form input[type="password"] {
   padding: 0.85rem;
   font-size: 1.1rem;
   border-radius: 4px;
-  /* Uses global button styles, can be overridden if needed */
 }
 
 .error-message-login {
@@ -97,6 +96,5 @@ body.dark-mode .error-message-login {
 }
 
 .login-page .switch-form-link a {
-  /* Uses global link styles */
   font-weight: bold;
 } 

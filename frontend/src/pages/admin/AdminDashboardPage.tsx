@@ -10,10 +10,8 @@ const AdminDashboardPage: React.FC = () => {
       <nav className="admin-dashboard-nav">
         <ul>
           <li><Link to="/admin/movies" className="admin-button-link">Manage Movies</Link></li>
-          {/* Add more admin links here as needed, styled with .admin-button-link or similar */}
         </ul>
       </nav>
-      {/* You can add more dashboard-specific content here */}
     </div>
   );
 };

@@ -5,52 +5,53 @@
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW92aWVzfGVufDB8fDB8fHww&w=1000&q=80');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Parallax-like effect */
+  background-attachment: fixed;
   color: #fff;
-  padding-top: 6rem;
+  padding-top: 0;
+  margin-top: -20px;
   padding-bottom: 6rem;
   text-align: center;
   position: relative;
-  min-height: 70vh; /* Make hero section taller */
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100vw; /* Full viewport width */
+  width: 100vw;
   left: 50%;
   transform: translateX(-50%);
-  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
-  overflow-x: hidden; /* Try to hide any scrollbar caused by 100vw exceeding parent bounds if parent has padding */
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* .hero-overlay can be used if you want a color overlay on top of the image, already handled by linear-gradient */
 
 .hero-content {
   max-width: 800px;
-  z-index: 1; /* Ensure content is above any pseudo-elements if used for overlay */
-  padding: 0 2rem; /* Horizontal padding for the content inside hero-section */
-  box-sizing: border-box; /* Ensure padding doesn't make .hero-content wider than max-width */
+  z-index: 1;
+  padding: 0 2rem;
+  padding-top: calc(6rem + 20px);
+  box-sizing: border-box;
 }
 
 .hero-title {
-  font-size: 3.5rem; /* Larger title */
+  font-size: 3.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Text shadow for readability */
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .hero-subtitle {
-  font-size: 1.5rem; /* Larger subtitle */
+  font-size: 1.5rem;
   margin-bottom: 2.5rem;
   line-height: 1.6;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
 .hero-button {
-  padding: 1rem 2.5rem; /* Larger button */
+  padding: 1rem 2.5rem;
   font-size: 1.1rem;
   font-weight: bold;
-  color: #fff; /* White text for light mode or when no dark mode specific rule applies */
-  background-color: #bb86fc; /* Accent color */
+  color: #fff;
+  background-color: #bb86fc;
   border: none;
   border-radius: 5px;
   text-decoration: none;
@@ -59,41 +60,38 @@
 }
 
 .hero-button:hover {
-  background-color: #a06cd5; /* Darker accent for light mode */
+  background-color: #a06cd5;
   transform: translateY(-2px);
-  /* color: #fff; Ensure text color remains white on hover in light mode if needed */
 }
 
 /* Dark mode specific styles for hero button */
 body.dark-mode .hero-button {
-  color: #121212; /* Dark text for better contrast on purple button in dark mode */
-  background-color: #bb86fc; /* Keep purple background, or adjust if needed */
-  /* box-shadow: 0 4px 10px rgba(255,255,255,0.1); /* Optional: lighter shadow for dark mode */
+  color: #121212;
+  background-color: #bb86fc;
 }
 
 body.dark-mode .hero-button:hover {
-  background-color: #cea8ff; /* Lighter purple on hover in dark mode to make dark text stand out */
-  color: #000000; /* Ensure text is very dark on hover */
+  background-color: #cea8ff;
+  color: #000000;
   transform: translateY(-2px);
 }
 
 /* Styles for the content area below the hero section */
 .home-page-content {
-  padding: 2rem; /* Renamed from .home-page to avoid conflict */
+  padding: 2rem;
   text-align: center;
 }
 
 
 /* Features Section - Enhanced */
 .features-section {
-  margin-top: 1rem; /* Reduced margin-top as hero takes more space */
+  margin-top: 1rem;
   padding-top: 2rem;
-  /* border-top: 1px solid #eee; Optional: Keep if desired */
 }
 
 .features-section h2 {
-  font-size: 2.2rem; /* Slightly larger */
-  margin-bottom: 2rem; /* Increased margin */
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
   color: #333;
 }
 
@@ -103,8 +101,8 @@ body.dark-mode .features-section h2 {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
-  gap: 2.5rem; /* Increased gap */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
 }
 
 .feature-item {
@@ -155,29 +153,3 @@ body.dark-mode .feature-item h3 {
 body.dark-mode .feature-item p {
   color: #b0b0b0;
 }
-
-/* Ensure previous .home-page h1, .lead styles are either removed or adjusted 
-   if they were meant for the old structure and might conflict. 
-   The hero section now has its own specific typography. */
-
-/* Weather Widget Styling - REMOVED as it is handled by WeatherWidget.css */
-/*
-.weather-widget {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  border: 1px solid #ddd; 
-  border-radius: 8px;
-  background-color: #f9f9f9; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-body.dark-mode .weather-widget {
-  border: 1px solid #444; 
-  background-color: #2a2a2a; 
-}
-
-.weather-widget h3 {
-  margin-top: 0;
-  font-size: 1.3rem;
-} 
-*/ 

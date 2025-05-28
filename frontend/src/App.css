@@ -103,7 +103,6 @@
 
 .nav-links:hover {
   color: #bb86fc; /* Highlight color for hover */
-  /* border-bottom: 3px solid #bb86fc; Optional: Add an underline effect on hover */
 }
 
 .nav-links-user {
@@ -136,17 +135,14 @@
 /* Responsive Design for Navbar */
 @media screen and (max-width: 960px) {
   .navbar-container {
-    /* Adjust padding for smaller screens if needed */
   }
 
   .nav-menu {
-    /* Stack menu items vertically or implement a burger menu for smaller screens */
-    /* This is a basic example; a burger menu would require JavaScript */
     flex-direction: column;
     width: 100%;
     position: absolute;
-    top: 80px; /* Position below the navbar */
-    left: -100%; /* Hide off-screen initially */
+    top: 80px;
+    left: -100%;
     opacity: 1;
     transition: all 0.5s ease;
     background: #1c1b1b; /* Background for dropdown */
@@ -181,12 +177,5 @@
   }
   
   .navbar-logo {
-    /* Adjust logo size or position if needed */
   }
-
-  /* Add a burger icon/menu toggle button here */
-  /* This would typically be an icon that, when clicked, toggles the .active class on .nav-menu */
 }
-
-/* Ensure existing .App-logo, .App-header, etc., styles don't conflict or are updated as needed. */
-/* For now, let's assume they are either not critical for this step or will be addressed later. */

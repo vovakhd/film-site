@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
   console.error("FATAL ERROR: JWT_SECRET is not defined in .env file.");
-  process.exit(1); // Зупинити процес, якщо секрет не визначено
+  process.exit(1);
 }
 
 // Helper to ensure data directory and users.json exist

@@ -12,5 +12,12 @@
     "email": "ughhj@gmail.com",
     "password": "$2b$10$9n/oaFefFgjf8N234YOATeT8a9fwvXGGTpHfCAVuTjWx7ZcbRIT2q",
     "role": "user"
+  },
+  {
+    "id": "mb82dci1.u5a",
+    "username": "user",
+    "email": "user@gmail.com",
+    "password": "$2b$10$asGdiELAw4RVLHBnub6KSuV5pQw5V6Vz4RMmHD33fib0LzCueJTFe",
+    "role": "user"
   }
 ]

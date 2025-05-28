@@ -2,75 +2,68 @@ import React, { useState, useEffect, useCallback, ChangeEvent } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './MovieListPage.css';
-import { Movie, PaginatedMoviesResponse } from '../types'; // Added PaginatedMoviesResponse
+import { Movie, PaginatedMoviesResponse } from '../types';
 
 const MovieListPage: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedGenre, setSelectedGenre] = useState<string>(''); // Default to empty, meaning 'All Genres'
+  const [selectedGenre, setSelectedGenre] = useState<string>('');
   const [genres, setGenres] = useState<string[]>([]);
-
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [moviesPerPage] = useState<number>(9); // Can be adjusted, should match backend or be configurable
+  const [moviesPerPage] = useState<number>(9);
 
   const fetchMovies = useCallback(async (page: number, limit: number, genre?: string, search?: string) => {
     setLoading(true);
     setError(null);
+
     try {
       const params = new URLSearchParams();
       params.append('page', page.toString());
       params.append('limit', limit.toString());
-      if (genre && genre !== 'All Genres') params.append('genre', genre.toLowerCase()); // Send lowercase to backend
+      if (genre && genre !== 'All Genres') params.append('genre', genre.toLowerCase());
       if (search) params.append('search', search);
 
-      // Explicitly type the expected response data structure
       const response = await axios.get<PaginatedMoviesResponse>(`/api/movies?${params.toString()}`);
       
-      // Now response.data is correctly typed
-      setMovies(response.data.movies || []); // Fallback to empty array if movies is undefined/null
-      setCurrentPage(response.data.currentPage || 1); // Fallback to 1 if undefined/null
-      setTotalPages(response.data.totalPages || 0);   // Fallback to 0 if undefined/null
+      setMovies(response.data.movies || []);
+      setCurrentPage(response.data.currentPage || 1);
+      setTotalPages(response.data.totalPages || 0);
 
     } catch (err) {
       setError('Failed to fetch movies. Please try again later.');
-      console.error(err);
+      console.error('Error fetching movies:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setLoading, setError, setMovies, setCurrentPage, setTotalPages]);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const loadData = async () => {
       setLoading(true);
-      try {
-        // Fetch genres first
-        const genresResponse = await axios.get<string[]>('/api/movies/genres');
-        setGenres(['All Genres', ...genresResponse.data]);
-        // Then fetch movies for the initial page
-        // We pass selectedGenre directly, it will be empty string initially (meaning 'All Genres')
-        await fetchMovies(currentPage, moviesPerPage, selectedGenre, searchTerm); 
-      } catch (error) {
-        console.error("Failed to fetch initial data", error);
-        setError('Failed to load initial data. Please try again.');
-        setGenres(['All Genres']); // Default to prevent errors
-      }
-      // setLoading(false); // This setLoading is for the initial data load, fetchMovies has its own
-    };
-    fetchInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps 
-  }, []); // Run only once on mount
+      setError(null);
 
-  // This useEffect will run when currentPage, selectedGenre, or searchTerm changes (AFTER initial load)
-  useEffect(() => {
-    const isInitialMount = currentPage === 1 && selectedGenre === '' && searchTerm === '' && movies.length === 0;
-    if (!isInitialMount && !loading) { // Avoid running on initial mount if fetchInitialData is handling it
-        fetchMovies(currentPage, moviesPerPage, selectedGenre, searchTerm);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, selectedGenre, searchTerm]); 
+      try {
+        if (genres.length === 0 || (genres.length === 1 && genres[0] === 'All Genres')) {
+          const genresResponse = await axios.get<string[]>('/api/movies/genres');
+          setGenres(['All Genres', ...genresResponse.data]);
+        }
+        
+        await fetchMovies(currentPage, moviesPerPage, selectedGenre, searchTerm);
+
+      } catch (err) {
+        console.error("Failed to load initial data (genres/movies):", err);
+        setError('Failed to load necessary page data. Please refresh or try again later.');
+        if (genres.length === 0) setGenres(['All Genres']);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [currentPage, selectedGenre, searchTerm, moviesPerPage, fetchMovies, genres, setGenres]);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -88,22 +81,20 @@ const MovieListPage: React.FC = () => {
     }
   };
   
-  // The filtering logic is now mostly handled by the backend.
-  // Client-side filtering might still be applied if desired on the current page's data,
-  // but primary filtering (search, genre) should be done via API params for server-side pagination.
-  // const filteredMovies = movies;
-
   if (loading && movies.length === 0) {
     return <div className="movie-list-loading" aria-live="polite">Loading movies...</div>;
   }
 
-  if (error) {
+  if (error && movies.length === 0) {
     return <div className="movie-list-error" role="alert" aria-live="assertive">Error: {error}</div>;
   }
 
   return (
     <div className="movie-list-page" role="main">
       <h1 className="movie-list-title">Explore Our Movie Collection</h1>
+      {error && movies.length > 0 && 
+        <div className="movie-list-error subtle-error" role="alert">Notice: {error}</div>
+      }
       <div className="filter-bar">
         <input
           type="text"
@@ -118,6 +109,7 @@ const MovieListPage: React.FC = () => {
           onChange={handleGenreChange} 
           className="genre-select"
           aria-label="Select movie genre"
+          disabled={genres.length <= 1}
         >
           {genres.map(genre => (
             <option key={genre} value={genre}>{genre.charAt(0).toUpperCase() + genre.slice(1)}</option>
@@ -143,14 +135,6 @@ const MovieListPage: React.FC = () => {
             />
             <div className="movie-card-content">
               <h3 className="movie-card-title">{movie.title}</h3>
-              {/*
-              <p className="movie-card-director">Director: {movie.director}</p>
-              <p className="movie-card-genre">Genre: {movie.genre}</p>
-              <p className="movie-card-release">Released: {new Date(movie.releaseDate).toLocaleDateString()}</p>
-              <p className="movie-card-description">
-                {movie.description.substring(0, 100)}{movie.description.length > 100 ? '...' : ''}
-              </p>
-              */}
               <Link to={`/movie/${movie.id}`} className="movie-card-link">View Details</Link>
             </div>
           </div>
