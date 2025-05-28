@@ -33,7 +33,7 @@
 
 1.  **Клонуйте репозиторій:**
     ```bash
-    git clone <URL_вашого_репозиторію>
+    git clone https://github.com/vovakhd/film-site.git
     cd film-site
     ```
 
